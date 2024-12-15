@@ -6,6 +6,7 @@ import {
   getBase64FromMediaMessageDto,
   LastMessage,
   MarkChatUnreadDto,
+  MarkChatReadDto,
   NumberBusiness,
   OnWhatsAppDto,
   PrivacySettingDto,
@@ -3484,6 +3485,43 @@ export class BaileysStartupService extends ChannelStartupService {
       throw new InternalServerErrorException({
         markedChatUnread: false,
         message: ['An error occurred while marked unread the chat. Open a calling.', error.toString()],
+      });
+    }
+  }
+
+  public async markChatRead(data: MarkChatReadDto) {
+    try {
+      let last_message = data.lastMessage;
+      let number = data.chat;
+
+      if (!last_message && number) {
+        last_message = await this.getLastMessage(number);
+      } else {
+        last_message = data.lastMessage;
+        last_message.messageTimestamp = last_message?.messageTimestamp ?? Date.now();
+        number = last_message?.key?.remoteJid;
+      }
+
+      if (!last_message || Object.keys(last_message).length === 0) {
+        throw new NotFoundException('Last message not found');
+      }
+
+      await this.client.chatModify(
+        {
+          markRead: true,
+          lastMessages: [last_message],
+        },
+        this.createJid(number),
+      );
+
+      return {
+        chatId: number,
+        markedChatRead: true,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException({
+        markedChatUnread: false,
+        message: ['An error occurred while marked read the chat. Open a calling.', error.toString()],
       });
     }
   }

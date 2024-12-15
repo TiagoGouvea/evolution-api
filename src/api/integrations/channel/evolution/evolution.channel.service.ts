@@ -545,6 +545,9 @@ export class EvolutionStartupService extends ChannelStartupService {
   public async markChatUnread() {
     throw new BadRequestException('Method not available on Evolution Channel');
   }
+  public async markChatRead() {
+    throw new BadRequestException('Method not available on Evolution Channel');
+  }
   public async fetchProfile() {
     throw new BadRequestException('Method not available on Evolution Channel');
   }
